@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "数学题库数据结构 Schema",
+  "description": "支持选择题和计算题的数学题库数据结构，包含错误分析和学习推荐功能",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "数据结构版本号"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "created_at": {"type": "string", "format": "date"},
+        "last_updated": {"type": "string", "format": "date"},
+        "total_questions": {"type": "integer", "minimum": 0}
+      },
+      "required": ["description", "created_at", "last_updated", "total_questions"]
+    },
+    "question_bank": {
+      "type": "object",
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/question"
+          }
+        }
+      },
+      "required": ["questions"]
+    },
+    "answer_analysis": {
+      "type": "object",
+      "properties": {
+        "error_categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/error_category"
+          }
+        },
+        "student_answers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/student_answer"
+          }
+        }
+      },
+      "required": ["error_categories", "student_answers"]
+    },
+    "learning_analytics": {
+      "type": "object",
+      "properties": {
+        "difficulty_distribution": {
+          "$ref": "#/definitions/difficulty_distribution"
+        },
+        "common_errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/common_error"
+          }
+        },
+        "recommended_practice": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/practice_recommendation"
+          }
+        }
+      }
+    }
+  },
+  "required": ["version", "metadata", "question_bank", "answer_analysis", "learning_analytics"],
+  "definitions": {
+    "question": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^q_\\d+$",
+          "description": "题目唯一标识符"
+        },
+        "question_info": {
+          "$ref": "#/definitions/question_info"
+        },
+        "question_type": {
+          "type": "string",
+          "enum": ["choice", "calculation"],
+          "description": "题目类型：选择题或计算题"
+        },
+        "correct_answer": {
+          "oneOf": [
+            {"$ref": "#/definitions/choice_answer"},
+            {"$ref": "#/definitions/calculation_answer"}
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/choice"
+          },
+          "description": "选择题选项，仅选择题需要"
+        },
+        "solution_steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/solution_step"
+          },
+          "description": "解题步骤"
+        },
+        "question_settings": {
+          "$ref": "#/definitions/question_settings"
+        }
+      },
+      "required": ["id", "question_info", "question_type", "correct_answer", "solution_steps", "question_settings"]
+    },
+    "question_info": {
+      "type": "object",
+      "properties": {
+        "text": {"type": "string", "description": "题目文本"},
+        "subject": {"type": "string", "description": "学科"},
+        "grade": {"type": "string", "description": "年级"},
+        "chapter": {"type": "string", "description": "章节"},
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"],
+          "description": "难度等级"
+        },
+        "tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "题目标签"
+        },
+        "estimated_time": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "预估答题时间（秒）"
+        }
+      },
+      "required": ["text", "subject", "grade", "chapter", "difficulty", "tags", "estimated_time"]
+    },
+    "choice_answer": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string", "enum": ["single_choice", "multiple_choice"]},
+        "value": {"type": "string", "description": "正确答案值"},
+        "explanation": {"type": "string", "description": "答案解释"}
+      },
+      "required": ["type", "value", "explanation"]
+    },
+    "calculation_answer": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string", "enum": ["exact_value", "range_value", "expression"]},
+        "value": {"type": "string", "description": "正确答案值"},
+        "unit": {"type": ["string", "null"], "description": "单位"},
+        "tolerance": {"type": "number", "description": "容差"},
+        "explanation": {"type": "string", "description": "答案解释"}
+      },
+      "required": ["type", "value", "explanation"]
+    },
+    "choice": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "description": "选项标识符"},
+        "content": {"type": "string", "description": "选项内容"},
+        "is_correct": {"type": "boolean", "description": "是否为正确答案"},
+        "explanation": {"type": "string", "description": "选项解释"}
+      },
+      "required": ["id", "content", "is_correct", "explanation"]
+    },
+    "solution_step": {
+      "type": "object",
+      "properties": {
+        "step": {"type": "integer", "minimum": 1, "description": "步骤序号"},
+        "description": {"type": "string", "description": "步骤描述"},
+        "formula": {"type": "string", "description": "数学公式"}
+      },
+      "required": ["step", "description", "formula"]
+    },
+    "question_settings": {
+      "type": "object",
+      "properties": {
+        "randomize_choices": {"type": "boolean", "description": "是否随机排列选项"},
+        "multiple_select": {"type": "boolean", "description": "是否多选"},
+        "has_none_of_above": {"type": "boolean", "description": "是否有"以上都不是"选项"},
+        "show_hint": {"type": "boolean", "description": "是否显示提示"},
+        "allow_calculator": {"type": "boolean", "description": "是否允许使用计算器"},
+        "require_work_shown": {"type": "boolean", "description": "是否要求展示解题过程"}
+      }
+    },
+    "error_category": {
+      "type": "object",
+      "properties": {
+        "category_id": {"type": "string", "description": "错误类别ID"},
+        "name": {"type": "string", "description": "错误类别名称"},
+        "description": {"type": "string", "description": "错误类别描述"},
+        "subcategories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sub_id": {"type": "string"},
+              "name": {"type": "string"},
+              "description": {"type": "string"}
+            },
+            "required": ["sub_id", "name", "description"]
+          }
+        }
+      },
+      "required": ["category_id", "name", "description", "subcategories"]
+    },
+    "student_answer": {
+      "type": "object",
+      "properties": {
+        "answer_id": {"type": "string", "description": "答案ID"},
+        "question_id": {"type": "string", "description": "题目ID"},
+        "student_id": {"type": "string", "description": "学生ID"},
+        "selected_choice": {"type": "string", "description": "选择的选项"},
+        "is_correct": {"type": "boolean", "description": "是否正确"},
+        "error_analysis": {
+          "type": "object",
+          "properties": {
+            "primary_error": {"type": "string", "description": "主要错误类型"},
+            "secondary_error": {"type": "string", "description": "次要错误类型"},
+            "error_description": {"type": "string", "description": "错误描述"},
+            "suggested_remediation": {"type": "string", "description": "建议补救措施"}
+          },
+          "required": ["primary_error", "error_description", "suggested_remediation"]
+        },
+        "timestamp": {"type": "string", "format": "date-time", "description": "答题时间"},
+        "time_spent": {"type": "integer", "minimum": 0, "description": "答题用时（秒）"}
+      },
+      "required": ["answer_id", "question_id", "student_id", "is_correct", "error_analysis", "timestamp", "time_spent"]
+    },
+    "difficulty_distribution": {
+      "type": "object",
+      "properties": {
+        "easy": {"type": "number", "minimum": 0, "maximum": 1},
+        "medium": {"type": "number", "minimum": 0, "maximum": 1},
+        "hard": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "required": ["easy", "medium", "hard"]
+    },
+    "common_error": {
+      "type": "object",
+      "properties": {
+        "error_category": {"type": "string", "description": "错误类别"},
+        "frequency": {"type": "number", "minimum": 0, "maximum": 1, "description": "错误频率"},
+        "affected_questions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "受影响的题目ID列表"
+        }
+      },
+      "required": ["error_category", "frequency", "affected_questions"]
+    },
+    "practice_recommendation": {
+      "type": "object",
+      "properties": {
+        "student_id": {"type": "string", "description": "学生ID"},
+        "weak_areas": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "薄弱领域"
+        },
+        "recommended_questions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "推荐题目ID列表"
+        },
+        "difficulty_progression": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["easy", "medium", "hard"]},
+          "description": "难度递进顺序"
+        }
+      },
+      "required": ["student_id", "weak_areas", "recommended_questions", "difficulty_progression"]
+    }
+  }
+}

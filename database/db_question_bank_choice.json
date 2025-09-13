@@ -1,0 +1,379 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "description": "数学题库 - 选择题专项",
+    "created_at": "2024-01-01",
+    "last_updated": "2024-01-01",
+    "total_questions": 13,
+    "source": "choice.json"
+  },
+  "question_bank": {
+    "questions": [
+      {
+        "id": "choice_001",
+        "question_info": {
+          "text": "计算：(-3 × (-2)³) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘方", "乘法", "负数运算"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "24",
+          "explanation": "正确计算了乘方及乘法，负负得正。"
+        },
+        "choices": [
+          {"id": "a", "content": "24", "is_correct": true, "explanation": "正确计算了乘方及乘法，负负得正。"},
+          {"id": "b", "content": "-24", "is_correct": false, "explanation": "错误地忽略了乘方的负号对最终结果的影响。"},
+          {"id": "c", "content": "-48", "is_correct": false, "explanation": "计算过程中把乘方弄错和乘法弄混。"},
+          {"id": "d", "content": "18", "is_correct": false, "explanation": "错误将乘方计算为乘法。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "首先计算括号内的乘方：(-2)³ = -8", "formula": "(-2)³ = -8"},
+          {"step": 2, "description": "然后计算乘积：-3 × (-8) = 24", "formula": "-3 × (-8) = 24"}
+        ]
+      },
+      {
+        "id": "choice_002",
+        "question_info": {
+          "text": "计算：((-4)² - (-3)²) 的值是多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘方", "减法"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "7",
+          "explanation": "正确计算两个平方的结果及相减。"
+        },
+        "choices": [
+          {"id": "a", "content": "7", "is_correct": true, "explanation": "正确计算两个平方的结果及相减。"},
+          {"id": "b", "content": "-7", "is_correct": false, "explanation": "错误使用了减法顺序或者符号。"},
+          {"id": "c", "content": "-25", "is_correct": false, "explanation": "错误地将平方和差混淆。"},
+          {"id": "d", "content": "25", "is_correct": false, "explanation": "错误将平方数相加代替相减。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算平方：(-4)² = 16，(-3)² = 9", "formula": "(-4)² = 16, (-3)² = 9"},
+          {"step": 2, "description": "计算差值：16 - 9 = 7", "formula": "16 - 9 = 7"}
+        ]
+      },
+      {
+        "id": "choice_003",
+        "question_info": {
+          "text": "下列计算结果中，正确的是？(0.5 - (-1.2) = ?)",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "小数运算",
+          "difficulty": "easy",
+          "tags": ["小数", "小数运算", "负数运算"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "1.7",
+          "explanation": "正确处理负号转换加法。"
+        },
+        "choices": [
+          {"id": "a", "content": "1.7", "is_correct": true, "explanation": "正确处理负号转换加法。"},
+          {"id": "b", "content": "-0.7", "is_correct": false, "explanation": "错误地把减负号当做减号。"},
+          {"id": "c", "content": "-1.7", "is_correct": false, "explanation": "忽略加法，应为正数。"},
+          {"id": "d", "content": "0.7", "is_correct": false, "explanation": "错误加减符号转换。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "负负得正，(0.5 - (-1.2) = 0.5 + 1.2 = 1.7)", "formula": "0.5 - (-1.2) = 0.5 + 1.2 = 1.7"}
+        ]
+      },
+      {
+        "id": "choice_004",
+        "question_info": {
+          "text": "计算：(-6/2 + (-3) × (-2)) 等于多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "混合运算",
+          "difficulty": "medium",
+          "tags": ["混合运算", "除法", "乘法", "负数运算"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "3",
+          "explanation": "正确运用了除法和乘法的符号规则。"
+        },
+        "choices": [
+          {"id": "a", "content": "3", "is_correct": true, "explanation": "正确运用了除法和乘法的符号规则。"},
+          {"id": "b", "content": "-3", "is_correct": false, "explanation": "错误地将乘法结果视为负值。"},
+          {"id": "c", "content": "-9", "is_correct": false, "explanation": "错误合并加减和乘除。"},
+          {"id": "d", "content": "9", "is_correct": false, "explanation": "误将负数当作正数处理。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "先计算除法：-6/2 = -3", "formula": "-6/2 = -3"},
+          {"step": 2, "description": "计算乘法：-3 × -2 = 6", "formula": "-3 × -2 = 6"},
+          {"step": 3, "description": "最后相加：-3 + 6 = 3", "formula": "-3 + 6 = 3"}
+        ]
+      },
+      {
+        "id": "choice_005",
+        "question_info": {
+          "text": "计算：((-7) - (-10) + 4) 的结果是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "负数运算", "加法"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "7",
+          "explanation": "负负得正步骤正确。"
+        },
+        "choices": [
+          {"id": "a", "content": "7", "is_correct": true, "explanation": "负负得正步骤正确。"},
+          {"id": "b", "content": "-7", "is_correct": false, "explanation": "错误地未转换减负号，导致符号错误。"},
+          {"id": "c", "content": "-17", "is_correct": false, "explanation": "数字顺序与符号理解错误。"},
+          {"id": "d", "content": "17", "is_correct": false, "explanation": "数字符号计算错误。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "先计算-7 - (-10) = -7 + 10 = 3", "formula": "-7 - (-10) = -7 + 10 = 3"},
+          {"step": 2, "description": "再加4：3 + 4 = 7", "formula": "3 + 4 = 7"}
+        ]
+      },
+      {
+        "id": "choice_006",
+        "question_info": {
+          "text": "计算：((-2)⁴ × (-1)³) 等于多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "乘方运算",
+          "difficulty": "medium",
+          "tags": ["乘方", "幂运算", "乘法"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "-16",
+          "explanation": "正确计算乘方及乘积符号。"
+        },
+        "choices": [
+          {"id": "a", "content": "-16", "is_correct": true, "explanation": "正确计算乘方及乘积符号。"},
+          {"id": "b", "content": "16", "is_correct": false, "explanation": "忽略奇数幂的负号影响。"},
+          {"id": "c", "content": "-8", "is_correct": false, "explanation": "幂和乘法混淆。"},
+          {"id": "d", "content": "8", "is_correct": false, "explanation": "负号计算错误。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算乘方：(-2)⁴ = 16，(-1)³ = -1", "formula": "(-2)⁴ = 16, (-1)³ = -1"},
+          {"step": 2, "description": "乘积结果：16 × (-1) = -16", "formula": "16 × (-1) = -16"}
+        ]
+      },
+      {
+        "id": "choice_007",
+        "question_info": {
+          "text": "计算：((-8)/(-2) - 3) 的值是多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "除法", "减法"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "1",
+          "explanation": "正确的除法和减法计算。"
+        },
+        "choices": [
+          {"id": "a", "content": "1", "is_correct": true, "explanation": "正确的除法和减法计算。"},
+          {"id": "b", "content": "-1", "is_correct": false, "explanation": "忽略负负得正。"},
+          {"id": "c", "content": "5", "is_correct": false, "explanation": "错误加法代替减法。"},
+          {"id": "d", "content": "-5", "is_correct": false, "explanation": "符号运算错误。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算除法：(-8)/(-2) = 4", "formula": "(-8)/(-2) = 4"},
+          {"step": 2, "description": "计算差值：4 - 3 = 1", "formula": "4 - 3 = 1"}
+        ]
+      },
+      {
+        "id": "choice_008",
+        "question_info": {
+          "text": "计算：((-3) × (-3) - (-3) × 3) 等于多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘法", "减法"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "18",
+          "explanation": "正确把减负号转加号处理。"
+        },
+        "choices": [
+          {"id": "a", "content": "18", "is_correct": true, "explanation": "正确把减负号转加号处理。"},
+          {"id": "b", "content": "0", "is_correct": false, "explanation": "错误地忽略了减负号。"},
+          {"id": "c", "content": "-18", "is_correct": false, "explanation": "符号计算混乱。"},
+          {"id": "d", "content": "-6", "is_correct": false, "explanation": "错误的乘法或加减运算。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算两个乘积：(-3) × (-3) = 9", "formula": "(-3) × (-3) = 9"},
+          {"step": 2, "description": "和 (-3) × 3 = -9", "formula": "(-3) × 3 = -9"},
+          {"step": 3, "description": "所以，9 - (-9) = 9 + 9 = 18", "formula": "9 - (-9) = 9 + 9 = 18"}
+        ]
+      },
+      {
+        "id": "choice_009",
+        "question_info": {
+          "text": "计算：((-5) + 3 - (-2)) 等于多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "加法", "减法"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "0",
+          "explanation": "正确处理了加减负号。"
+        },
+        "choices": [
+          {"id": "a", "content": "0", "is_correct": true, "explanation": "正确处理了加减负号。"},
+          {"id": "b", "content": "-8", "is_correct": false, "explanation": "错误加减符号处理。"},
+          {"id": "c", "content": "2", "is_correct": false, "explanation": "负数混淆。"},
+          {"id": "d", "content": "-2", "is_correct": false, "explanation": "忽略了减负号步骤。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "先计算-5 + 3 = -2", "formula": "-5 + 3 = -2"},
+          {"step": 2, "description": "再计算-2 - (-2) = -2 + 2 = 0", "formula": "-2 - (-2) = -2 + 2 = 0"}
+        ]
+      },
+      {
+        "id": "choice_010",
+        "question_info": {
+          "text": "计算：(2.5 - 4.7 + (-1.8)) 等于多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "小数运算",
+          "difficulty": "easy",
+          "tags": ["小数", "小数运算", "加法", "减法"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "-4.0",
+          "explanation": "正确处理加法和减法。"
+        },
+        "choices": [
+          {"id": "a", "content": "-4.0", "is_correct": true, "explanation": "正确处理加法和减法。"},
+          {"id": "b", "content": "2.2", "is_correct": false, "explanation": "把减法错误当成加法。"},
+          {"id": "c", "content": "1.0", "is_correct": false, "explanation": "计算顺序错误。"},
+          {"id": "d", "content": "4.0", "is_correct": false, "explanation": "符号混淆。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算：2.5 - 4.7 = -2.2", "formula": "2.5 - 4.7 = -2.2"},
+          {"step": 2, "description": "再加上-1.8，得到-2.2 + (-1.8) = -4.0", "formula": "-2.2 + (-1.8) = -4.0"}
+        ]
+      },
+      {
+        "id": "choice_011",
+        "question_info": {
+          "text": "计算：((-9) ÷ (-3) + (-6)) 结果是多少？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "除法", "加法"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "-3",
+          "explanation": "负负得正，之后加负数。"
+        },
+        "choices": [
+          {"id": "a", "content": "-3", "is_correct": true, "explanation": "负负得正，之后加负数。"},
+          {"id": "b", "content": "3", "is_correct": false, "explanation": "忽略加负号步骤。"},
+          {"id": "c", "content": "15", "is_correct": false, "explanation": "错误加法和乘法混淆。"},
+          {"id": "d", "content": "-15", "is_correct": false, "explanation": "错误符号运算。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算除法：(-9) ÷ (-3) = 3", "formula": "(-9) ÷ (-3) = 3"},
+          {"step": 2, "description": "再加-6，3 + (-6) = -3", "formula": "3 + (-6) = -3"}
+        ]
+      },
+      {
+        "id": "choice_012",
+        "question_info": {
+          "text": "计算：(5 - (-3) × 2) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "混合运算",
+          "difficulty": "medium",
+          "tags": ["混合运算", "乘法", "减法"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "11",
+          "explanation": "正确处理乘法及减负号变加号。"
+        },
+        "choices": [
+          {"id": "a", "content": "11", "is_correct": true, "explanation": "正确处理乘法及减负号变加号。"},
+          {"id": "b", "content": "-1", "is_correct": false, "explanation": "未正确转换减负号。"},
+          {"id": "c", "content": "1", "is_correct": false, "explanation": "符号计算错误。"},
+          {"id": "d", "content": "-11", "is_correct": false, "explanation": "忽略负数乘法生成负数。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算乘法：(-3) × 2 = -6", "formula": "(-3) × 2 = -6"},
+          {"step": 2, "description": "计算减法：5 - (-6) = 5 + 6 = 11", "formula": "5 - (-6) = 5 + 6 = 11"}
+        ]
+      },
+      {
+        "id": "choice_013",
+        "question_info": {
+          "text": "计算：((-1)⁵ + (-2)⁴) 的结果是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "乘方运算",
+          "difficulty": "medium",
+          "tags": ["乘方", "幂运算", "加法"],
+          "estimated_time": 90
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "15",
+          "explanation": "正确计算各自的幂及相加。"
+        },
+        "choices": [
+          {"id": "a", "content": "15", "is_correct": true, "explanation": "正确计算各自的幂及相加。"},
+          {"id": "b", "content": "-15", "is_correct": false, "explanation": "符号错误。"},
+          {"id": "c", "content": "-17", "is_correct": false, "explanation": "综合符号误用。"},
+          {"id": "d", "content": "17", "is_correct": false, "explanation": "误将负数弄成正数。"}
+        ],
+        "solution_steps": [
+          {"step": 1, "description": "计算：(-1)⁵ = -1，(-2)⁴ = 16", "formula": "(-1)⁵ = -1, (-2)⁴ = 16"},
+          {"step": 2, "description": "相加结果：-1 + 16 = 15", "formula": "-1 + 16 = 15"}
+        ]
+      }
+    ]
+  }
+}

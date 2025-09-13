@@ -1,0 +1,587 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "description": "数学题库 - 标准格式题目",
+    "created_at": "2024-01-01",
+    "last_updated": "2024-01-01",
+    "total_questions": 4,
+    "source": "demo_question_database.json"
+  },
+  "question_bank": {
+    "questions": [
+      {
+        "id": "q_001",
+        "question_info": {
+          "text": "计算：(-3 × (-2)³) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘方", "乘法", "负数运算"],
+          "estimated_time": 120
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "24",
+          "explanation": "首先计算括号内的乘方：(-2)³ = -8，然后计算乘积：-3 × (-8) = 24"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "首先计算括号内的乘方：(-2)³ = -8",
+            "formula": "(-2)³ = -8"
+          },
+          {
+            "step": 2,
+            "description": "然后计算乘积：-3 × (-8) = 24",
+            "formula": "-3 × (-8) = 24"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_002",
+        "question_info": {
+          "text": "计算：(-7) + 12 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "加法", "正负数"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "5",
+          "explanation": "正数 12 与负数 -7 相加，结果为 12 - 7 = 5"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "将加法转化为差：12 - 7",
+            "formula": "12 - 7 = 5"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_003",
+        "question_info": {
+          "text": "计算：(-5) - (-9) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "减法", "正负数"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "4",
+          "explanation": "减去一个负数等于加上它的相反数：(-5) - (-9) = -5 + 9 = 4"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "把减去负数转化为加法：-5 + 9",
+            "formula": "-5 + 9"
+          },
+          {
+            "step": 2,
+            "description": "计算结果：-5 + 9 = 4",
+            "formula": "4"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_004",
+        "question_info": {
+          "text": "计算：(-4) × (-6) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "乘法", "负数运算"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "24",
+          "explanation": "两个负数相乘结果为正数：(-4) × (-6) = 24"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "两个负数相乘得正数，先算绝对值：4 × 6 = 24",
+            "formula": "(-4) × (-6) = 24"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_005",
+        "question_info": {
+          "text": "计算：(-18) ÷ 6 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "除法", "负数运算"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "-3",
+          "explanation": "负数除以正数等于负数：-18 ÷ 6 = -3"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "先算绝对值除法：18 ÷ 6 = 3",
+            "formula": "18 ÷ 6 = 3"
+          },
+          {
+            "step": 2,
+            "description": "负数 ÷ 正数 = 负数，结果为 -3",
+            "formula": "-3"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_006",
+        "question_info": {
+          "text": "计算：(-2)² × 3 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘方", "乘法"],
+          "estimated_time": 90
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "12",
+          "explanation": "(-2)² = 4，再计算 4 × 3 = 12"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "计算平方：(-2)² = 4",
+            "formula": "(-2)² = 4"
+          },
+          {
+            "step": 2,
+            "description": "再乘以 3：4 × 3 = 12",
+            "formula": "4 × 3 = 12"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_007",
+        "question_info": {
+          "text": "计算：(-27) ÷ (-9) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "除法", "负数运算"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "3",
+          "explanation": "负数除以负数等于正数：(-27) ÷ (-9) = 3"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "先算绝对值：27 ÷ 9 = 3",
+            "formula": "27 ÷ 9 = 3"
+          },
+          {
+            "step": 2,
+            "description": "负 ÷ 负 = 正，结果为 3",
+            "formula": "3"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_008",
+        "question_info": {
+          "text": "计算：(15) - (-4) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "减法", "正负数"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "19",
+          "explanation": "减去一个负数等于加上它的相反数：15 - (-4) = 15 + 4 = 19"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "将减负数转化为加法：15 + 4",
+            "formula": "15 + 4"
+          },
+          {
+            "step": 2,
+            "description": "计算：15 + 4 = 19",
+            "formula": "19"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_009",
+        "question_info": {
+          "text": "计算：(-10) + (-12) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "加法", "负数运算"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "-22",
+          "explanation": "两个负数相加，绝对值相加，结果取负号：-10 + (-12) = -(10+12) = -22"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "绝对值相加：10 + 12 = 22",
+            "formula": "10 + 12 = 22"
+          },
+          {
+            "step": 2,
+            "description": "两个负数相加结果为负，结果是 -22",
+            "formula": "-22"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_010",
+        "question_info": {
+          "text": "计算：(-2)⁴ ÷ 8 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘方", "除法"],
+          "estimated_time": 90
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "2",
+          "explanation": "(-2)⁴ = 16，然后 16 ÷ 8 = 2"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "计算乘方：(-2)⁴ = 16",
+            "formula": "(-2)⁴ = 16"
+          },
+          {
+            "step": 2,
+            "description": "再除以 8：16 ÷ 8 = 2",
+            "formula": "16 ÷ 8 = 2"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+
+      {
+        "id": "q_011",
+        "question_info": {
+          "text": "计算：(-3 × (-2)³) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "乘方", "乘法", "负数运算"],
+          "estimated_time": 120
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "24",
+          "explanation": "首先计算括号内的乘方：(-2)³ = -8，然后计算乘积：-3 × (-8) = 24"
+        },
+        "choices": [
+          {
+            "id": "a",
+            "content": "24",
+            "is_correct": true,
+            "explanation": "正确计算了乘方及乘法，负负得正。"
+          },
+          {
+            "id": "b",
+            "content": "-24",
+            "is_correct": false,
+            "explanation": "错误地忽略了乘方的负号对最终结果的影响。"
+          },
+          {
+            "id": "c",
+            "content": "-48",
+            "is_correct": false,
+            "explanation": "计算过程中把乘方弄错和乘法弄混。"
+          },
+          {
+            "id": "d",
+            "content": "18",
+            "is_correct": false,
+            "explanation": "错误将乘方计算为乘法。"
+          }
+        ],
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "首先计算括号内的乘方：(-2)³ = -8",
+            "formula": "(-2)³ = -8"
+          },
+          {
+            "step": 2,
+            "description": "然后计算乘积：-3 × (-8) = 24",
+            "formula": "-3 × (-8) = 24"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_012",
+        "question_info": {
+          "text": "计算：2x + 3 = 11 中 x 的值",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "一元一次方程",
+          "difficulty": "easy",
+          "tags": ["方程", "一元一次方程", "解方程"],
+          "estimated_time": 90
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "type": "exact_value",
+          "value": "4",
+          "explanation": "通过移项和系数化1得到 x = 4"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "移项：2x = 11 - 3",
+            "formula": "2x = 8"
+          },
+          {
+            "step": 2,
+            "description": "系数化1：x = 8 ÷ 2",
+            "formula": "x = 4"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": true
+        }
+      },
+      {
+        "id": "q_013",
+        "question_info": {
+          "text": "下列哪个数是质数？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "数的性质",
+          "difficulty": "easy",
+          "tags": ["质数", "数的性质", "因数"],
+          "estimated_time": 60
+        },
+        "question_type": "choice",
+        "correct_answer": {
+          "type": "single_choice",
+          "value": "17",
+          "explanation": "17只能被1和17整除，是质数"
+        },
+        "choices": [
+          {
+            "id": "a",
+            "content": "15",
+            "is_correct": false,
+            "explanation": "15 = 3 × 5，不是质数"
+          },
+          {
+            "id": "b",
+            "content": "17",
+            "is_correct": true,
+            "explanation": "17只能被1和17整除，是质数"
+          },
+          {
+            "id": "c",
+            "content": "21",
+            "is_correct": false,
+            "explanation": "21 = 3 × 7，不是质数"
+          },
+          {
+            "id": "d",
+            "content": "25",
+            "is_correct": false,
+            "explanation": "25 = 5 × 5，不是质数"
+          }
+        ],
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "检查15的因数",
+            "formula": "15 = 3 × 5"
+          },
+          {
+            "step": 2,
+            "description": "检查17的因数",
+            "formula": "17 = 1 × 17"
+          },
+          {
+            "step": 3,
+            "description": "检查21的因数",
+            "formula": "21 = 3 × 7"
+          },
+          {
+            "step": 4,
+            "description": "检查25的因数",
+            "formula": "25 = 5 × 5"
+          },
+          {
+            "step": 5,
+            "description": "得出结论",
+            "formula": "只有17是质数"
+          }
+        ],
+        "question_settings": null
+      },
+      {
+        "id": "q_004",
+        "question_info": {
+          "text": "解方程：3x - 7 = 14",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "一元一次方程",
+          "difficulty": "medium",
+          "tags": ["方程", "一元一次方程", "解方程"],
+          "estimated_time": 120
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "type": "exact_value",
+          "value": "7",
+          "explanation": "通过移项和系数化1得到 x = 7"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "移项：3x = 14 + 7",
+            "formula": "3x = 21"
+          },
+          {
+            "step": 2,
+            "description": "系数化1：x = 21 ÷ 3",
+            "formula": "x = 7"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": true
+        }
+      }
+    ]
+  }
+}

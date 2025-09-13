@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "description": "学生答题记录数据库",
+    "created_at": "2024-01-01",
+    "last_updated": "2024-01-01",
+    "total_answers": 0
+  },
+  "answer_records": [
+    {
+      "answer_id": "ans_001",
+      "student_id": "student_001",
+      "question_id": "q_001",
+      "session_id": "session_001",
+      "answer_data": {
+        "selected_choice": "b",
+        "calculated_answer": null,
+        "answer_text": "学生选择了选项b",
+        "confidence_level": 0.7
+      },
+      "result": {
+        "is_correct": false,
+        "score": 0,
+        "time_spent": 95,
+        "attempts": 1
+      },
+      "error_analysis": {
+        "primary_error": "符号错误",
+        "secondary_error": "负数运算",
+        "error_description": "学生错误地忽略了乘方的负号对最终结果的影响",
+        "suggested_remediation": "重点练习负数的乘方运算，理解负数的奇偶次幂规律"
+      },
+      "timestamp": "2024-01-01T10:05:00",
+      "metadata": {
+        "device": "desktop",
+        "browser": "chrome",
+        "ip_address": "192.168.1.100"
+      }
+    },
+    {
+      "answer_id": "ans_002",
+      "student_id": "student_001",
+      "question_id": "q_002",
+      "session_id": "session_001",
+      "answer_data": {
+        "selected_choice": null,
+        "calculated_answer": "4",
+        "answer_text": "学生计算得到x=4",
+        "confidence_level": 0.9
+      },
+      "result": {
+        "is_correct": true,
+        "score": 100,
+        "time_spent": 120,
+        "attempts": 1
+      },
+      "error_analysis": null,
+      "timestamp": "2024-01-01T10:07:00",
+      "metadata": {
+        "device": "desktop",
+        "browser": "chrome",
+        "ip_address": "192.168.1.100"
+      }
+    }
+  ],
+  "sessions": [
+    {
+      "session_id": "session_001",
+      "student_id": "student_001",
+      "start_time": "2024-01-01T10:00:00",
+      "end_time": "2024-01-01T10:30:00",
+      "total_questions": 2,
+      "correct_answers": 1,
+      "accuracy_rate": 0.5,
+      "total_time_spent": 215,
+      "session_type": "practice",
+      "error_types": ["符号错误"],
+      "weak_areas": ["负数运算"]
+    }
+  ],
+  "statistics": {
+    "total_sessions": 1,
+    "total_answers": 2,
+    "overall_accuracy": 0.5,
+    "most_common_errors": [
+      {
+        "error_type": "符号错误",
+        "count": 1,
+        "percentage": 50.0
+      }
+    ],
+    "difficulty_performance": {
+      "easy": {"correct": 1, "total": 1, "accuracy": 1.0},
+      "medium": {"correct": 0, "total": 1, "accuracy": 0.0},
+      "hard": {"correct": 0, "total": 0, "accuracy": 0.0}
+    }
+  }
+}
