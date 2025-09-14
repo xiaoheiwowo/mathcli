@@ -15,14 +15,12 @@ try:
     from .ocr_processor import OCRProcessor
     from .ai_processor import AIProcessor, MathProblem
     from .markdown_grader import MarkdownGrader
-    from .question_matcher import QuestionMatcher
     from .test_id_manager import TestIDManager
 except ImportError:
     # Handle direct execution
     from ocr_processor import OCRProcessor
     from ai_processor import AIProcessor, MathProblem
     from markdown_grader import MarkdownGrader
-    from question_matcher import QuestionMatcher
     from test_id_manager import TestIDManager
 
 
@@ -61,7 +59,6 @@ class MathGrader:
         
         self.ocr_processor = OCRProcessor()
         self.ai_processor = AIProcessor()
-        self.question_matcher = QuestionMatcher()
         self.test_id_manager = TestIDManager()
         
         # Setup logging
@@ -1182,14 +1179,10 @@ class MathGrader:
             self.logger.info(f"OCR识别完成，置信度: {ocr_result['confidence']:.2f}%")
             self.logger.info(f"识别文本:\n{ocr_result['raw_text']}")
             
-            # Step 2: Find matching questions in question bank
-            self.logger.info("步骤2: 在题库中查找匹配题目")
-            matched_questions = self._find_matching_questions(ocr_result['raw_text'])
-            
-            # Step 3: Convert to Markdown using LLM with matched questions
-            self.logger.info("步骤3: 转换为Markdown格式")
-            markdown_content = self._convert_ocr_to_markdown_with_matches(
-                ocr_result['raw_text'], format_type, matched_questions
+            # Step 2: Convert to Markdown using LLM
+            self.logger.info("步骤2: 转换为Markdown格式")
+            markdown_content = self._convert_ocr_to_markdown(
+                ocr_result['raw_text'], format_type
             )
             
             if not markdown_content:
@@ -1210,8 +1203,7 @@ class MathGrader:
                 "confidence": ocr_result['confidence'],
                 "method": ocr_result.get('method', 'unknown'),
                 "format_type": format_type,
-                "content_length": len(markdown_content),
-                "matched_questions": matched_questions
+                "content_length": len(markdown_content)
             }
             
         except Exception as e:
@@ -1456,210 +1448,9 @@ OCR识别内容：
         
         return '\n'.join(markdown_lines)
     
-    def _find_matching_questions(self, ocr_text: str) -> List[Dict[str, Any]]:
-        """在题库中查找匹配的题目
-        
-        Args:
-            ocr_text: OCR识别的文本
-            
-        Returns:
-            匹配的题目列表
-        """
-        matched_questions = []
-        
-        try:
-            # 使用正则表达式分割题目
-            import re
-            # 匹配题目编号模式
-            question_patterns = [
-                r'(\d+[\.\)]\s*[^0-9]+?)(?=\d+[\.\)]|$)',  # 数字编号
-                r'([一二三四五六七八九十]+[\.\)]\s*[^一二三四五六七八九十]+?)(?=[一二三四五六七八九十]+[\.\)]|$)',  # 中文编号
-            ]
-            
-            questions = []
-            for pattern in question_patterns:
-                matches = re.findall(pattern, ocr_text, re.DOTALL)
-                questions.extend(matches)
-            
-            if not questions:
-                # 如果没有找到题目分割，将整个文本作为一个题目
-                questions = [ocr_text]
-            
-            self.logger.info(f"从OCR文本中识别到 {len(questions)} 个题目片段")
-            
-            # 为每个题目片段查找匹配
-            for i, question_text in enumerate(questions):
-                question_text = question_text.strip()
-                if not question_text:
-                    continue
-                
-                self.logger.info(f"匹配第 {i+1} 题: {question_text[:50]}...")
-                
-                # 判断题目类型
-                question_type = self._detect_question_type(question_text)
-                
-                # 查找匹配的题目
-                match_result = self.question_matcher.find_matching_question(question_text, question_type)
-                
-                if match_result:
-                    matched_questions.append({
-                        "ocr_text": question_text,
-                        "matched_question": match_result["question"],
-                        "similarity": match_result["similarity"],
-                        "method": match_result["method"],
-                        "question_index": i + 1
-                    })
-                    self.logger.info(f"第 {i+1} 题匹配成功: {match_result['question']['id']} (相似度: {match_result['similarity']:.3f})")
-                else:
-                    self.logger.warning(f"第 {i+1} 题未找到匹配: {question_text[:50]}...")
-                    matched_questions.append({
-                        "ocr_text": question_text,
-                        "matched_question": None,
-                        "similarity": 0.0,
-                        "method": "no_match",
-                        "question_index": i + 1
-                    })
-            
-        except Exception as e:
-            self.logger.error(f"题目匹配失败: {e}")
-        
-        return matched_questions
     
-    def _detect_question_type(self, question_text: str) -> str:
-        """检测题目类型
-        
-        Args:
-            question_text: 题目文本
-            
-        Returns:
-            题目类型 (choice/calculation)
-        """
-        # 检测选择题特征
-        choice_patterns = [
-            r'[A-D][\.\)]',  # A. B. C. D.
-            r'[a-d][\.\)]',  # a. b. c. d.
-            r'选择',  # 包含"选择"字样
-            r'下列.*?正确',  # 下列...正确
-            r'哪个.*?是',  # 哪个...是
-        ]
-        
-        for pattern in choice_patterns:
-            if re.search(pattern, question_text):
-                return "choice"
-        
-        # 检测计算题特征
-        calc_patterns = [
-            r'计算',  # 包含"计算"字样
-            r'求',  # 包含"求"字样
-            r'解',  # 包含"解"字样
-            r'[+\-*/=]',  # 包含数学运算符
-        ]
-        
-        for pattern in calc_patterns:
-            if re.search(pattern, question_text):
-                return "calculation"
-        
-        return "calculation"  # 默认为计算题
     
-    def _convert_ocr_to_markdown_with_matches(self, ocr_text: str, format_type: str, 
-                                            matched_questions: List[Dict[str, Any]]) -> str:
-        """使用匹配的题目信息转换为Markdown格式
-        
-        Args:
-            ocr_text: OCR识别的原始文本
-            format_type: 试卷格式类型
-            matched_questions: 匹配的题目列表
-            
-        Returns:
-            Markdown格式的试卷内容
-        """
-        if not self.ai_processor.use_llm or not self.ai_processor.client:
-            self.logger.warning("LLM不可用，使用基础Markdown转换")
-            return self._basic_ocr_to_markdown(ocr_text, format_type)
-        
-        try:
-            # 构建匹配题目信息
-            match_info = self._build_match_info(matched_questions)
-            
-            # 根据格式类型选择不同的提示词
-            format_prompts = {
-                'practice': self._get_practice_format_prompt(),
-                'exam': self._get_exam_format_prompt(),
-                'homework': self._get_homework_format_prompt()
-            }
-            
-            prompt = format_prompts.get(format_type, format_prompts['practice'])
-            
-            # 构建完整的提示词
-            full_prompt = f"""请将以下OCR识别的数学试卷内容转换为结构化的Markdown格式。
-
-OCR识别内容：
-{ocr_text}
-
-{prompt}
-
-匹配的题库题目信息：
-{match_info}
-
-请严格按照上述格式要求输出Markdown内容，并利用匹配的题库题目信息来：
-1. 保持原有的题目顺序和编号
-2. 正确识别选择题和计算题
-3. 使用题库中的标准题目内容（如果匹配度较高）
-4. 保持数学表达式的准确性
-5. 使用标准的Markdown语法
-6. 不要添加任何解释性文字，直接输出Markdown内容"""
-
-            response = self.ai_processor.client.chat.completions.create(
-                model="qwen-plus",
-                messages=[
-                    {
-                        'role': 'system',
-                        'content': '你是一位专业的数学老师，擅长将OCR识别的试卷内容转换为结构化的Markdown格式。请利用题库信息提高转换质量，严格按照要求输出格式化的Markdown内容。'
-                    },
-                    {'role': 'user', 'content': full_prompt}
-                ],
-                temperature=0.1,
-                max_tokens=4000
-            )
-            
-            markdown_content = response.choices[0].message.content.strip()
-            self.logger.info("LLM Markdown转换完成（使用题库匹配）")
-            return markdown_content
-            
-        except Exception as e:
-            self.logger.error(f"LLM Markdown转换失败: {e}")
-            self.logger.info("回退到基础Markdown转换")
-            return self._basic_ocr_to_markdown(ocr_text, format_type)
     
-    def _build_match_info(self, matched_questions: List[Dict[str, Any]]) -> str:
-        """构建匹配题目信息字符串
-        
-        Args:
-            matched_questions: 匹配的题目列表
-            
-        Returns:
-            格式化的匹配信息字符串
-        """
-        if not matched_questions:
-            return "未找到匹配的题库题目"
-        
-        info_lines = []
-        for match in matched_questions:
-            if match["matched_question"]:
-                question = match["matched_question"]
-                info_lines.append(f"题目 {match['question_index']}:")
-                info_lines.append(f"  OCR文本: {match['ocr_text'][:100]}...")
-                info_lines.append(f"  匹配题目ID: {question['id']}")
-                info_lines.append(f"  题库题目: {question.get('question_info', {}).get('text', '')[:100]}...")
-                info_lines.append(f"  相似度: {match['similarity']:.3f}")
-                info_lines.append(f"  匹配方法: {match['method']}")
-                info_lines.append("")
-            else:
-                info_lines.append(f"题目 {match['question_index']}: 未找到匹配")
-                info_lines.append(f"  OCR文本: {match['ocr_text'][:100]}...")
-                info_lines.append("")
-        
-        return "\n".join(info_lines)
 
 
 def main() -> None:
