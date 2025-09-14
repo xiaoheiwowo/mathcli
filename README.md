@@ -2,6 +2,14 @@
 
 AI驱动的数学作业批改工具，支持图片OCR识别、智能分析、自动批改、练习试卷生成和题库管理。
 
+
+```bash
+python -m mathcli.cli stats
+python -m mathcli.cli practice -e 分数运算 -e 乘方
+python -m mathcli.cli ocr-to-markdown -i mathcli/inputs/practics/practics_xiaoming.png
+python -m mathcli.cli grade-markdown -f output/practice_test.md -j output/practice_test.json
+```
+
 ## 功能特性
 
 - 📸 **图片OCR识别** - 支持中英文数学题目识别
