@@ -581,6 +581,196 @@
           "allow_calculator": false,
           "require_work_shown": true
         }
+      },
+      {
+        "id": "q_014",
+        "question_info": {
+          "text": "计算：(−3) + (−9) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "加法", "同号相加"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "-12",
+          "explanation": "同号两数相加，符号不变，绝对值相加：3 + 9 = 12，结果取负号为 -12。"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "同号相加，符号不变，绝对值相加：3 + 9 = 12",
+            "formula": "3 + 9 = 12"
+          },
+          {
+            "step": 2,
+            "description": "取负号，结果为 -12",
+            "formula": "-12"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_015",
+        "question_info": {
+          "text": "计算：12 + (−8) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "加法", "异号相加"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "4",
+          "explanation": "异号相加，取绝对值较大的数的符号，且做差：12 − 8 = 4。"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "比较绝对值：|12| > |−8|，结果符号为正。",
+            "formula": "sign = +"
+          },
+          {
+            "step": 2,
+            "description": "绝对值相减：12 − 8 = 4",
+            "formula": "4"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_016",
+        "question_info": {
+          "text": "计算：(−4.7) + 3.9 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "medium",
+          "tags": ["有理数", "加法", "小数运算", "异号相加"],
+          "estimated_time": 90
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "-0.8",
+          "explanation": "异号相加，取绝对值较大的数的符号：|-4.7| > |3.9|，结果为负，计算 4.7 − 3.9 = 0.8。"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "比较绝对值：|−4.7| > |3.9|，结果符号为负。",
+            "formula": "sign = −"
+          },
+          {
+            "step": 2,
+            "description": "绝对值相减：4.7 − 3.9 = 0.8",
+            "formula": "0.8"
+          },
+          {
+            "step": 3,
+            "description": "结果为 −0.8",
+            "formula": "−0.8"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_017",
+        "question_info": {
+          "text": "计算：(−5) − (−9) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "减法", "转化为加法"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "4",
+          "explanation": "减去一个负数等于加上它的相反数：−5 − (−9) = −5 + 9 = 4。"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "将减法转化为加法：−5 − (−9) = −5 + 9",
+            "formula": "−5 + 9"
+          },
+          {
+            "step": 2,
+            "description": "计算：−5 + 9 = 4",
+            "formula": "4"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
+      },
+      {
+        "id": "q_018",
+        "question_info": {
+          "text": "计算：(−4) × (−6) 的值是？",
+          "subject": "数学",
+          "grade": "七年级",
+          "chapter": "有理数运算",
+          "difficulty": "easy",
+          "tags": ["有理数", "乘法", "同号相乘"],
+          "estimated_time": 60
+        },
+        "question_type": "calculation",
+        "correct_answer": {
+          "value": "24",
+          "explanation": "两个负数相乘得正，先算绝对值：4 × 6 = 24。"
+        },
+        "solution_steps": [
+          {
+            "step": 1,
+            "description": "两个负数相乘，结果为正。",
+            "formula": "sign = +"
+          },
+          {
+            "step": 2,
+            "description": "绝对值相乘：4 × 6 = 24",
+            "formula": "24"
+          }
+        ],
+        "question_settings": {
+          "randomize_choices": true,
+          "multiple_select": false,
+          "has_none_of_above": false,
+          "show_hint": true,
+          "allow_calculator": false,
+          "require_work_shown": false
+        }
       }
     ]
   }

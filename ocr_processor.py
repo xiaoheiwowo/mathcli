@@ -82,20 +82,32 @@ class OCRProcessor:
         Returns:
             Dictionary containing raw OCR text and confidence scores
         """
+        result = None
+        
         # Try AI OCR first if available
         if self.use_ai_ocr and self.ai_client:
             try:
                 ai_result = self._extract_text_with_ai(image_path)
                 if ai_result and ai_result.get('raw_text'):
                     self.logger.info("Using AI OCR result")
-                    return ai_result
+                    result = ai_result
                 else:
                     self.logger.warning("AI OCR failed, falling back to traditional OCR")
             except Exception as e:
                 self.logger.warning(f"AI OCR failed: {e}, falling back to traditional OCR")
         
-        # Fallback to traditional OCR
-        return self._extract_text_traditional(image_path)
+        # Fallback to traditional OCR if AI OCR failed
+        if not result:
+            result = self._extract_text_traditional(image_path)
+        
+        # 尝试识别试卷ID
+        if result and result.get('raw_text'):
+            test_id = self._extract_test_id(result['raw_text'])
+            if test_id:
+                result['test_id'] = test_id
+                self.logger.info(f"识别到试卷ID: {test_id}")
+        
+        return result
     
     def _extract_text_with_ai(self, image_path: str) -> Dict[str, str]:
         """Extract text using Qwen-VL-OCR model.
@@ -253,3 +265,41 @@ class OCRProcessor:
             expressions.extend(matches)
         
         return expressions
+    
+    def _extract_test_id(self, text: str) -> Optional[str]:
+        """从OCR文本中提取试卷ID
+        
+        Args:
+            text: OCR识别的文本
+            
+        Returns:
+            试卷ID字符串，如果未找到则返回None
+        """
+        import re
+        
+        # 试卷ID模式：PR/EX/HW + 12位十六进制字符
+        test_id_patterns = [
+            r'(PR[A-F0-9]{12})',  # 练习试卷
+            r'(EX[A-F0-9]{12})',  # 考试试卷
+            r'(HW[A-F0-9]{12})',  # 作业试卷
+            r'(TS[A-F0-9]{12})',  # 通用试卷
+        ]
+        
+        for pattern in test_id_patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                return match.group(1).upper()
+        
+        # 也尝试在"试卷ID"关键词附近查找
+        id_keyword_patterns = [
+            r'试卷ID[：:]\s*([A-Z]{2}[A-F0-9]{12})',
+            r'试卷编号[：:]\s*([A-Z]{2}[A-F0-9]{12})',
+            r'Test ID[：:]\s*([A-Z]{2}[A-F0-9]{12})',
+        ]
+        
+        for pattern in id_keyword_patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                return match.group(1).upper()
+        
+        return None

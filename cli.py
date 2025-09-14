@@ -4,19 +4,26 @@ import argparse
 import json
 import logging
 import os
+import random
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 try:
     from .ocr_processor import OCRProcessor
     from .ai_processor import AIProcessor, MathProblem
+    from .markdown_grader import MarkdownGrader
+    from .question_matcher import QuestionMatcher
+    from .test_id_manager import TestIDManager
 except ImportError:
     # Handle direct execution
     from ocr_processor import OCRProcessor
     from ai_processor import AIProcessor, MathProblem
+    from markdown_grader import MarkdownGrader
+    from question_matcher import QuestionMatcher
+    from test_id_manager import TestIDManager
 
 
 class ImageDataFilter(logging.Filter):
@@ -54,6 +61,8 @@ class MathGrader:
         
         self.ocr_processor = OCRProcessor()
         self.ai_processor = AIProcessor()
+        self.question_matcher = QuestionMatcher()
+        self.test_id_manager = TestIDManager()
         
         # Setup logging
         self.setup_logging()
@@ -412,13 +421,14 @@ class MathGrader:
         return steps
     
     def generate_practice_test(self, error_types: List[str], choice_count: int = 2, 
-                              calculation_count: int = 2) -> Dict[str, Any]:
+                              calculation_count: int = 2, random_seed: Optional[int] = None) -> Dict[str, Any]:
         """根据错误类型生成练习试卷
         
         Args:
             error_types: 错误类型列表
             choice_count: 选择题数量
             calculation_count: 计算题数量
+            random_seed: 随机种子，用于控制随机性（可选）
             
         Returns:
             练习试卷数据
@@ -426,14 +436,25 @@ class MathGrader:
         self.logger.info(f"开始生成练习试卷，错误类型: {error_types}")
         
         try:
+            # 设置随机种子
+            import random
+            if random_seed is not None:
+                random.seed(random_seed)
+                self.logger.info(f"使用随机种子: {random_seed}")
+            else:
+                # 使用当前时间作为随机种子，确保每次生成都不同
+                random.seed()
+                self.logger.info("使用时间戳作为随机种子")
+            
             # 加载题库数据
             question_db = self._load_question_database()
             if not question_db:
                 return {"error": "无法加载题库数据"}
             
             # 根据错误类型筛选题目
+            difficulty_range = None  # 可以从参数中获取
             selected_questions = self._select_questions_by_error_types(
-                question_db, error_types, choice_count, calculation_count
+                question_db, error_types, choice_count, calculation_count, difficulty_range
             )
             
             if not selected_questions:
@@ -454,10 +475,15 @@ class MathGrader:
             
             # 生成练习试卷（移除答案和解题过程）
             practice_questions = []
+            question_ids = []
+            
             for question in selected_questions:
+                question_id = question.get('id', '')
+                question_ids.append(question_id)
+                
                 # 创建不包含答案的题目副本
                 practice_question = {
-                    "id": question.get('id', ''),
+                    "id": question_id,
                     "question_info": question.get('question_info', {}),
                     "question_type": question.get('question_type', ''),
                 }
@@ -474,18 +500,42 @@ class MathGrader:
                 
                 practice_questions.append(practice_question)
             
+            # 生成试卷ID
+            test_id = self.test_id_manager.generate_test_id(question_ids, "practice")
+            
+            # 为每道题目添加题目编号
+            for i, question in enumerate(practice_questions, 1):
+                question["question_number"] = f"第 {i} 题"
+            
             # 生成练习试卷
             practice_test = {
                 "test_info": {
+                    "test_id": test_id,
                     "generated_at": datetime.now().isoformat(),
                     "error_types": error_types,
                     "total_questions": len(practice_questions),
                     "choice_questions": choice_count_actual,
-                    "calculation_questions": calculation_count_actual
+                    "calculation_questions": calculation_count_actual,
+                    "test_type": "practice"
                 },
                 "questions": practice_questions,
                 "instructions": self._generate_test_instructions(error_types)
             }
+            
+            # 保存试卷记录到数据库
+            test_info = {
+                "test_type": "practice",
+                "error_types": error_types,
+                "choice_count": choice_count_actual,
+                "calculation_count": calculation_count_actual,
+                "generated_at": practice_test["test_info"]["generated_at"]
+            }
+            
+            save_success = self.test_id_manager.save_test_record(test_id, question_ids, test_info)
+            if save_success:
+                self.logger.info(f"试卷记录已保存到数据库: {test_id}")
+            else:
+                self.logger.warning(f"试卷记录保存失败: {test_id}")
             
             self.logger.info(f"练习试卷生成完成，共 {len(selected_questions)} 道题目")
             return practice_test
@@ -545,7 +595,7 @@ class MathGrader:
     
     def _select_questions_by_error_types(self, question_db: Dict[str, Any], 
                                        error_types: List[str], choice_count: int, 
-                                       calculation_count: int) -> List[Dict[str, Any]]:
+                                       calculation_count: int, difficulty_range: Optional[Tuple[str, str]] = None) -> List[Dict[str, Any]]:
         """根据错误类型选择题目"""
         selected_questions = []
         
@@ -575,18 +625,108 @@ class MathGrader:
         
         self.logger.info(f"匹配的题目: 选择题 {len(choice_questions)} 道, 计算题 {len(calculation_questions)} 道")
         
-        # 随机选择指定数量的题目
-        import random
+        # 增强的随机选择算法
         
+        # 随机打乱题目顺序，增加随机性
+        random.shuffle(choice_questions)
+        random.shuffle(calculation_questions)
+        
+        # 如果指定了难度范围，进一步筛选
+        if difficulty_range:
+            choice_questions = self._filter_by_difficulty(choice_questions, difficulty_range)
+            calculation_questions = self._filter_by_difficulty(calculation_questions, difficulty_range)
+        
+        # 随机选择指定数量的题目
         if choice_questions:
             selected_choice_count = min(choice_count, len(choice_questions))
-            selected_questions.extend(random.sample(choice_questions, selected_choice_count))
-            self.logger.info(f"选择了 {selected_choice_count} 道选择题")
+            # 使用加权随机选择，优先选择难度适中的题目
+            selected_choice = self._weighted_random_selection(choice_questions, selected_choice_count)
+            selected_questions.extend(selected_choice)
+            self.logger.info(f"选择了 {len(selected_choice)} 道选择题")
         
         if calculation_questions:
             selected_calc_count = min(calculation_count, len(calculation_questions))
-            selected_questions.extend(random.sample(calculation_questions, selected_calc_count))
-            self.logger.info(f"选择了 {selected_calc_count} 道计算题")
+            # 使用加权随机选择，优先选择难度适中的题目
+            selected_calc = self._weighted_random_selection(calculation_questions, selected_calc_count)
+            selected_questions.extend(selected_calc)
+            self.logger.info(f"选择了 {len(selected_calc)} 道计算题")
+        
+        # 最终随机打乱题目顺序
+        random.shuffle(selected_questions)
+        
+        return selected_questions
+    
+    def _filter_by_difficulty(self, questions: List[Dict[str, Any]], difficulty_range: Tuple[str, str]) -> List[Dict[str, Any]]:
+        """根据难度范围筛选题目"""
+        min_difficulty, max_difficulty = difficulty_range
+        difficulty_order = ['easy', 'medium', 'hard']
+        
+        try:
+            min_idx = difficulty_order.index(min_difficulty)
+            max_idx = difficulty_order.index(max_difficulty)
+        except ValueError:
+            return questions
+        
+        filtered_questions = []
+        for question in questions:
+            difficulty = question.get('question_info', {}).get('difficulty', 'medium')
+            if difficulty in difficulty_order:
+                diff_idx = difficulty_order.index(difficulty)
+                if min_idx <= diff_idx <= max_idx:
+                    filtered_questions.append(question)
+        
+        return filtered_questions
+    
+    def _weighted_random_selection(self, questions: List[Dict[str, Any]], count: int) -> List[Dict[str, Any]]:
+        """加权随机选择题目，优先选择难度适中的题目"""
+        if not questions or count <= 0:
+            return []
+        
+        if count >= len(questions):
+            return questions.copy()
+        
+        # 计算每个题目的权重
+        weights = []
+        for question in questions:
+            difficulty = question.get('question_info', {}).get('difficulty', 'medium')
+            
+            # 难度权重：easy=1, medium=2, hard=1.5
+            if difficulty == 'easy':
+                weight = 1.0
+            elif difficulty == 'medium':
+                weight = 2.0  # 优先选择中等难度
+            elif difficulty == 'hard':
+                weight = 1.5
+            else:
+                weight = 1.0
+            
+            # 添加随机因子，避免总是选择相同的题目
+            weight += random.uniform(0, 0.5)
+            weights.append(weight)
+        
+        # 使用加权随机选择
+        selected_indices = random.choices(
+            range(len(questions)), 
+            weights=weights, 
+            k=count
+        )
+        
+        # 去重并保持顺序
+        selected_questions = []
+        seen_indices = set()
+        for idx in selected_indices:
+            if idx not in seen_indices:
+                selected_questions.append(questions[idx])
+                seen_indices.add(idx)
+        
+        # 如果去重后数量不足，补充随机选择
+        while len(selected_questions) < count:
+            remaining_indices = [i for i in range(len(questions)) if i not in seen_indices]
+            if not remaining_indices:
+                break
+            idx = random.choice(remaining_indices)
+            selected_questions.append(questions[idx])
+            seen_indices.add(idx)
         
         return selected_questions
     
@@ -695,7 +835,8 @@ class MathGrader:
             f.write(f"**重点练习**: {', '.join(test_info['error_types'])}\n")
             f.write(f"**题目总数**: {test_info['total_questions']}\n")
             f.write(f"**选择题**: {test_info['choice_questions']} 道\n")
-            f.write(f"**计算题**: {test_info['calculation_questions']} 道\n\n")
+            f.write(f"**计算题**: {test_info['calculation_questions']} 道\n")
+            f.write(f"**试卷ID**: {test_info.get('test_id', 'N/A')}\n\n")
             
             # 说明
             f.write("## 答题说明\n\n")
@@ -732,6 +873,12 @@ class MathGrader:
                     f.write("```\n\n")
                 
                 f.write("---\n\n")
+            
+            # 在试卷末尾添加试卷ID
+            f.write("---\n\n")
+            f.write("## 试卷标识\n\n")
+            f.write(f"**试卷ID**: {test_info.get('test_id', 'N/A')}\n\n")
+            f.write("*请保留此试卷ID，用于后续批改和成绩查询*\n")
         
         self.logger.info(f"Markdown试卷已保存到: {md_file}")
     
@@ -1008,6 +1155,511 @@ class MathGrader:
         output.append("=" * 60)
         
         return "\n".join(output)
+    
+    def convert_image_to_markdown(self, image_path: str, format_type: str = 'practice', 
+                                 output_filename: str = 'ocr_result.md') -> Dict[str, Any]:
+        """将图片转换为Markdown格式的试卷内容
+        
+        Args:
+            image_path: 输入图片路径
+            format_type: 试卷格式类型 (practice/exam/homework)
+            output_filename: 输出Markdown文件名
+            
+        Returns:
+            转换结果字典
+        """
+        self.logger.info(f"开始将图片转换为Markdown: {image_path}")
+        
+        try:
+            # Step 1: OCR Processing
+            self.logger.info("步骤1: OCR文字识别")
+            ocr_result = self.ocr_processor.extract_text(image_path)
+            
+            if 'error' in ocr_result:
+                self.logger.error(f"OCR处理失败: {ocr_result['error']}")
+                return {"error": "OCR processing failed", "details": ocr_result['error']}
+            
+            self.logger.info(f"OCR识别完成，置信度: {ocr_result['confidence']:.2f}%")
+            self.logger.info(f"识别文本:\n{ocr_result['raw_text']}")
+            
+            # Step 2: Find matching questions in question bank
+            self.logger.info("步骤2: 在题库中查找匹配题目")
+            matched_questions = self._find_matching_questions(ocr_result['raw_text'])
+            
+            # Step 3: Convert to Markdown using LLM with matched questions
+            self.logger.info("步骤3: 转换为Markdown格式")
+            markdown_content = self._convert_ocr_to_markdown_with_matches(
+                ocr_result['raw_text'], format_type, matched_questions
+            )
+            
+            if not markdown_content:
+                return {"error": "Failed to convert OCR text to Markdown"}
+            
+            # Step 3: Save Markdown file
+            self.logger.info("步骤3: 保存Markdown文件")
+            output_file = self.output_dir / output_filename
+            
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(markdown_content)
+            
+            self.logger.info(f"Markdown文件已保存到: {output_file}")
+            
+            return {
+                "success": True,
+                "output_file": str(output_file),
+                "confidence": ocr_result['confidence'],
+                "method": ocr_result.get('method', 'unknown'),
+                "format_type": format_type,
+                "content_length": len(markdown_content),
+                "matched_questions": matched_questions
+            }
+            
+        except Exception as e:
+            self.logger.error(f"图片转Markdown失败: {e}")
+            return {"error": f"Image to Markdown conversion failed: {str(e)}"}
+    
+    def _convert_ocr_to_markdown(self, ocr_text: str, format_type: str) -> str:
+        """使用LLM将OCR文本转换为Markdown格式
+        
+        Args:
+            ocr_text: OCR识别的原始文本
+            format_type: 试卷格式类型
+            
+        Returns:
+            Markdown格式的试卷内容
+        """
+        if not self.ai_processor.use_llm or not self.ai_processor.client:
+            self.logger.warning("LLM不可用，使用基础Markdown转换")
+            return self._basic_ocr_to_markdown(ocr_text, format_type)
+        
+        try:
+            # 根据格式类型选择不同的提示词
+            format_prompts = {
+                'practice': self._get_practice_format_prompt(),
+                'exam': self._get_exam_format_prompt(),
+                'homework': self._get_homework_format_prompt()
+            }
+            
+            prompt = format_prompts.get(format_type, format_prompts['practice'])
+            
+            # 构建完整的提示词
+            full_prompt = f"""请将以下OCR识别的数学试卷内容转换为结构化的Markdown格式。
+
+OCR识别内容：
+{ocr_text}
+
+{prompt}
+
+请严格按照上述格式要求输出Markdown内容，确保：
+1. 保持原有的题目顺序和编号
+2. 正确识别选择题和计算题
+3. 保持数学表达式的准确性
+4. 使用标准的Markdown语法
+5. 不要添加任何解释性文字，直接输出Markdown内容"""
+
+            response = self.ai_processor.client.chat.completions.create(
+                model="qwen-plus",
+                messages=[
+                    {
+                        'role': 'system',
+                        'content': '你是一位专业的数学老师，擅长将OCR识别的试卷内容转换为结构化的Markdown格式。请严格按照要求输出格式化的Markdown内容。'
+                    },
+                    {'role': 'user', 'content': full_prompt}
+                ],
+                temperature=0.1,
+                max_tokens=3000
+            )
+            
+            markdown_content = response.choices[0].message.content.strip()
+            self.logger.info("LLM Markdown转换完成")
+            return markdown_content
+            
+        except Exception as e:
+            self.logger.error(f"LLM Markdown转换失败: {e}")
+            self.logger.info("回退到基础Markdown转换")
+            return self._basic_ocr_to_markdown(ocr_text, format_type)
+    
+    def _get_practice_format_prompt(self) -> str:
+        """获取练习试卷格式提示词"""
+        return """输出格式要求：
+
+# 数学练习试卷
+
+## 学生信息
+
+**姓名**: _________________
+
+**学号**: _________________
+
+**班级**: _________________
+
+---
+
+## 题目
+
+### 第 X 题
+
+**题目**: [题目内容]
+
+**选项**:
+- a. [选项A]
+- b. [选项B]
+- c. [选项C]
+- d. [选项D]
+
+**答案**: (    )
+
+---
+
+### 第 X 题
+
+**题目**: [题目内容]
+
+**解答**: 
+[解题过程]
+
+```"""
+    
+    def _get_exam_format_prompt(self) -> str:
+        """获取考试试卷格式提示词"""
+        return """输出格式要求：
+
+# 数学考试试卷
+
+## 考试信息
+
+**考试科目**: 数学
+
+**考试时间**: _________________
+
+**班级**: _________________
+
+**姓名**: _________________
+
+---
+
+## 题目
+
+### 一、选择题（每题X分，共XX分）
+
+#### 第 X 题
+
+**题目**: [题目内容]
+
+**选项**:
+- A. [选项A]
+- B. [选项B]
+- C. [选项C]
+- D. [选项D]
+
+**答案**: (    )
+
+### 二、计算题（每题X分，共XX分）
+
+#### 第 X 题
+
+**题目**: [题目内容]
+
+**解答**: 
+[解题过程]"""
+    
+    def _get_homework_format_prompt(self) -> str:
+        """获取作业格式提示词"""
+        return """输出格式要求：
+
+# 数学作业
+
+## 学生信息
+
+**姓名**: _________________
+
+**班级**: _________________
+
+**日期**: _________________
+
+---
+
+## 作业内容
+
+### 第 X 题
+
+**题目**: [题目内容]
+
+**解答**: 
+[解题过程]
+
+---"""
+    
+    def _basic_ocr_to_markdown(self, ocr_text: str, format_type: str) -> str:
+        """基础OCR到Markdown转换（不使用LLM）"""
+        import re
+        
+        # 简单的文本处理
+        lines = ocr_text.split('\n')
+        markdown_lines = []
+        
+        # 添加标题
+        if format_type == 'practice':
+            markdown_lines.append("# 数学练习试卷")
+        elif format_type == 'exam':
+            markdown_lines.append("# 数学考试试卷")
+        else:
+            markdown_lines.append("# 数学作业")
+        
+        markdown_lines.append("")
+        
+        # 添加学生信息区域
+        markdown_lines.append("## 学生信息")
+        markdown_lines.append("")
+        markdown_lines.append("**姓名**: _________________")
+        markdown_lines.append("")
+        markdown_lines.append("**学号**: _________________")
+        markdown_lines.append("")
+        markdown_lines.append("**班级**: _________________")
+        markdown_lines.append("")
+        markdown_lines.append("---")
+        markdown_lines.append("")
+        
+        # 添加题目区域
+        markdown_lines.append("## 题目")
+        markdown_lines.append("")
+        
+        # 简单的题目识别和格式化
+        current_question = 1
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # 检测题目编号
+            if re.match(r'^\d+[\.\)]\s*', line):
+                markdown_lines.append(f"### 第 {current_question} 题")
+                markdown_lines.append("")
+                markdown_lines.append(f"**题目**: {line}")
+                markdown_lines.append("")
+                markdown_lines.append("**解答**: ")
+                markdown_lines.append("")
+                markdown_lines.append("```")
+                markdown_lines.append("请在此处写出完整的解题过程")
+                markdown_lines.append("```")
+                markdown_lines.append("")
+                markdown_lines.append("---")
+                markdown_lines.append("")
+                current_question += 1
+            else:
+                # 其他内容作为题目描述
+                if not any(markdown_lines[-1].startswith(prefix) for prefix in ['**题目**:', '**解答**:', '```', '---']):
+                    if markdown_lines and not markdown_lines[-1].startswith('**题目**:'):
+                        markdown_lines.append(f"**题目**: {line}")
+                    else:
+                        markdown_lines.append(line)
+        
+        return '\n'.join(markdown_lines)
+    
+    def _find_matching_questions(self, ocr_text: str) -> List[Dict[str, Any]]:
+        """在题库中查找匹配的题目
+        
+        Args:
+            ocr_text: OCR识别的文本
+            
+        Returns:
+            匹配的题目列表
+        """
+        matched_questions = []
+        
+        try:
+            # 使用正则表达式分割题目
+            import re
+            # 匹配题目编号模式
+            question_patterns = [
+                r'(\d+[\.\)]\s*[^0-9]+?)(?=\d+[\.\)]|$)',  # 数字编号
+                r'([一二三四五六七八九十]+[\.\)]\s*[^一二三四五六七八九十]+?)(?=[一二三四五六七八九十]+[\.\)]|$)',  # 中文编号
+            ]
+            
+            questions = []
+            for pattern in question_patterns:
+                matches = re.findall(pattern, ocr_text, re.DOTALL)
+                questions.extend(matches)
+            
+            if not questions:
+                # 如果没有找到题目分割，将整个文本作为一个题目
+                questions = [ocr_text]
+            
+            self.logger.info(f"从OCR文本中识别到 {len(questions)} 个题目片段")
+            
+            # 为每个题目片段查找匹配
+            for i, question_text in enumerate(questions):
+                question_text = question_text.strip()
+                if not question_text:
+                    continue
+                
+                self.logger.info(f"匹配第 {i+1} 题: {question_text[:50]}...")
+                
+                # 判断题目类型
+                question_type = self._detect_question_type(question_text)
+                
+                # 查找匹配的题目
+                match_result = self.question_matcher.find_matching_question(question_text, question_type)
+                
+                if match_result:
+                    matched_questions.append({
+                        "ocr_text": question_text,
+                        "matched_question": match_result["question"],
+                        "similarity": match_result["similarity"],
+                        "method": match_result["method"],
+                        "question_index": i + 1
+                    })
+                    self.logger.info(f"第 {i+1} 题匹配成功: {match_result['question']['id']} (相似度: {match_result['similarity']:.3f})")
+                else:
+                    self.logger.warning(f"第 {i+1} 题未找到匹配: {question_text[:50]}...")
+                    matched_questions.append({
+                        "ocr_text": question_text,
+                        "matched_question": None,
+                        "similarity": 0.0,
+                        "method": "no_match",
+                        "question_index": i + 1
+                    })
+            
+        except Exception as e:
+            self.logger.error(f"题目匹配失败: {e}")
+        
+        return matched_questions
+    
+    def _detect_question_type(self, question_text: str) -> str:
+        """检测题目类型
+        
+        Args:
+            question_text: 题目文本
+            
+        Returns:
+            题目类型 (choice/calculation)
+        """
+        # 检测选择题特征
+        choice_patterns = [
+            r'[A-D][\.\)]',  # A. B. C. D.
+            r'[a-d][\.\)]',  # a. b. c. d.
+            r'选择',  # 包含"选择"字样
+            r'下列.*?正确',  # 下列...正确
+            r'哪个.*?是',  # 哪个...是
+        ]
+        
+        for pattern in choice_patterns:
+            if re.search(pattern, question_text):
+                return "choice"
+        
+        # 检测计算题特征
+        calc_patterns = [
+            r'计算',  # 包含"计算"字样
+            r'求',  # 包含"求"字样
+            r'解',  # 包含"解"字样
+            r'[+\-*/=]',  # 包含数学运算符
+        ]
+        
+        for pattern in calc_patterns:
+            if re.search(pattern, question_text):
+                return "calculation"
+        
+        return "calculation"  # 默认为计算题
+    
+    def _convert_ocr_to_markdown_with_matches(self, ocr_text: str, format_type: str, 
+                                            matched_questions: List[Dict[str, Any]]) -> str:
+        """使用匹配的题目信息转换为Markdown格式
+        
+        Args:
+            ocr_text: OCR识别的原始文本
+            format_type: 试卷格式类型
+            matched_questions: 匹配的题目列表
+            
+        Returns:
+            Markdown格式的试卷内容
+        """
+        if not self.ai_processor.use_llm or not self.ai_processor.client:
+            self.logger.warning("LLM不可用，使用基础Markdown转换")
+            return self._basic_ocr_to_markdown(ocr_text, format_type)
+        
+        try:
+            # 构建匹配题目信息
+            match_info = self._build_match_info(matched_questions)
+            
+            # 根据格式类型选择不同的提示词
+            format_prompts = {
+                'practice': self._get_practice_format_prompt(),
+                'exam': self._get_exam_format_prompt(),
+                'homework': self._get_homework_format_prompt()
+            }
+            
+            prompt = format_prompts.get(format_type, format_prompts['practice'])
+            
+            # 构建完整的提示词
+            full_prompt = f"""请将以下OCR识别的数学试卷内容转换为结构化的Markdown格式。
+
+OCR识别内容：
+{ocr_text}
+
+{prompt}
+
+匹配的题库题目信息：
+{match_info}
+
+请严格按照上述格式要求输出Markdown内容，并利用匹配的题库题目信息来：
+1. 保持原有的题目顺序和编号
+2. 正确识别选择题和计算题
+3. 使用题库中的标准题目内容（如果匹配度较高）
+4. 保持数学表达式的准确性
+5. 使用标准的Markdown语法
+6. 不要添加任何解释性文字，直接输出Markdown内容"""
+
+            response = self.ai_processor.client.chat.completions.create(
+                model="qwen-plus",
+                messages=[
+                    {
+                        'role': 'system',
+                        'content': '你是一位专业的数学老师，擅长将OCR识别的试卷内容转换为结构化的Markdown格式。请利用题库信息提高转换质量，严格按照要求输出格式化的Markdown内容。'
+                    },
+                    {'role': 'user', 'content': full_prompt}
+                ],
+                temperature=0.1,
+                max_tokens=4000
+            )
+            
+            markdown_content = response.choices[0].message.content.strip()
+            self.logger.info("LLM Markdown转换完成（使用题库匹配）")
+            return markdown_content
+            
+        except Exception as e:
+            self.logger.error(f"LLM Markdown转换失败: {e}")
+            self.logger.info("回退到基础Markdown转换")
+            return self._basic_ocr_to_markdown(ocr_text, format_type)
+    
+    def _build_match_info(self, matched_questions: List[Dict[str, Any]]) -> str:
+        """构建匹配题目信息字符串
+        
+        Args:
+            matched_questions: 匹配的题目列表
+            
+        Returns:
+            格式化的匹配信息字符串
+        """
+        if not matched_questions:
+            return "未找到匹配的题库题目"
+        
+        info_lines = []
+        for match in matched_questions:
+            if match["matched_question"]:
+                question = match["matched_question"]
+                info_lines.append(f"题目 {match['question_index']}:")
+                info_lines.append(f"  OCR文本: {match['ocr_text'][:100]}...")
+                info_lines.append(f"  匹配题目ID: {question['id']}")
+                info_lines.append(f"  题库题目: {question.get('question_info', {}).get('text', '')[:100]}...")
+                info_lines.append(f"  相似度: {match['similarity']:.3f}")
+                info_lines.append(f"  匹配方法: {match['method']}")
+                info_lines.append("")
+            else:
+                info_lines.append(f"题目 {match['question_index']}: 未找到匹配")
+                info_lines.append(f"  OCR文本: {match['ocr_text'][:100]}...")
+                info_lines.append("")
+        
+        return "\n".join(info_lines)
 
 
 def main() -> None:
@@ -1030,6 +1682,9 @@ def main() -> None:
     practice_parser.add_argument("-o", "--output", default="output", help="输出目录 (默认: output)")
     practice_parser.add_argument("--choice-count", type=int, default=2, help="选择题数量 (默认: 2)")
     practice_parser.add_argument("--calculation-count", type=int, default=2, help="计算题数量 (默认: 2)")
+    practice_parser.add_argument("--random-seed", type=int, help="随机种子，用于控制题目生成的随机性")
+    practice_parser.add_argument("--difficulty-range", nargs=2, choices=['easy', 'medium', 'hard'], 
+                                help="难度范围，如：easy medium")
     practice_parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
     
     # 查看题库统计命令
@@ -1039,6 +1694,32 @@ def main() -> None:
     stats_parser.add_argument("-o", "--output", help="输出到文件")
     stats_parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
     
+    # Markdown答卷批改命令
+    markdown_parser = subparsers.add_parser('grade-markdown', help='批改Markdown格式的答卷')
+    markdown_parser.add_argument("-f", "--file", required=True, help="Markdown答卷文件路径")
+    markdown_parser.add_argument("-j", "--json", help="试卷JSON文件路径，包含题目ID映射信息")
+    markdown_parser.add_argument("-o", "--output", default="output", help="输出目录 (默认: output)")
+    markdown_parser.add_argument("--use-llm", action="store_true", help="使用LLM进行增强解析")
+    markdown_parser.add_argument("--no-llm", action="store_true", help="禁用LLM解析，仅使用规则解析")
+    markdown_parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
+    
+    # 基于易错点生成练习题目命令
+    targeted_practice_parser = subparsers.add_parser('targeted-practice', help='基于易错点生成针对性练习题目')
+    targeted_practice_parser.add_argument("-f", "--file", required=True, help="Markdown答卷文件路径")
+    targeted_practice_parser.add_argument("-o", "--output", default="output", help="输出目录 (默认: output)")
+    targeted_practice_parser.add_argument("--choice-count", type=int, default=2, help="选择题数量 (默认: 2)")
+    targeted_practice_parser.add_argument("--calculation-count", type=int, default=2, help="计算题数量 (默认: 2)")
+    targeted_practice_parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
+    
+    # OCR转Markdown命令
+    ocr_md_parser = subparsers.add_parser('ocr-to-markdown', help='使用LLM OCR将试卷图片识别为Markdown内容')
+    ocr_md_parser.add_argument("-i", "--image", required=True, help="输入图片路径")
+    ocr_md_parser.add_argument("-o", "--output", default="output", help="输出目录 (默认: output)")
+    ocr_md_parser.add_argument("--filename", default="ocr_result.md", help="输出Markdown文件名 (默认: ocr_result.md)")
+    ocr_md_parser.add_argument("--format", choices=['practice', 'exam', 'homework'], default='practice', 
+                               help="试卷格式类型 (默认: practice)")
+    ocr_md_parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
+    
     args = parser.parse_args()
     
     # 如果没有提供命令，显示帮助
@@ -1047,6 +1728,24 @@ def main() -> None:
         return
     
     if args.command == 'grade':
+        # 检查图片文件是否存在
+        if not os.path.exists(args.image):
+            print(f"错误: 图片文件不存在: {args.image}", file=sys.stderr)
+            sys.exit(1)
+    
+    if args.command == 'grade-markdown':
+        # 检查Markdown文件是否存在
+        if not os.path.exists(args.file):
+            print(f"错误: Markdown文件不存在: {args.file}", file=sys.stderr)
+            sys.exit(1)
+    
+    if args.command == 'targeted-practice':
+        # 检查Markdown文件是否存在
+        if not os.path.exists(args.file):
+            print(f"错误: Markdown文件不存在: {args.file}", file=sys.stderr)
+            sys.exit(1)
+    
+    if args.command == 'ocr-to-markdown':
         # 检查图片文件是否存在
         if not os.path.exists(args.image):
             print(f"错误: 图片文件不存在: {args.image}", file=sys.stderr)
@@ -1082,10 +1781,15 @@ def main() -> None:
             grader = MathGrader(output_dir=args.output)
             
             # Generate practice test
+            difficulty_range = None
+            if args.difficulty_range:
+                difficulty_range = tuple(args.difficulty_range)
+            
             practice_test = grader.generate_practice_test(
                 error_types=args.error_types,
                 choice_count=args.choice_count,
-                calculation_count=args.calculation_count
+                calculation_count=args.calculation_count,
+                random_seed=args.random_seed
             )
             
             if "error" in practice_test:
@@ -1125,6 +1829,147 @@ def main() -> None:
                 print(f"统计信息已保存到: {args.output}")
             else:
                 print(output)
+        
+        elif args.command == 'grade-markdown':
+            # Initialize markdown grader
+            grader = MarkdownGrader(output_dir=args.output)
+            
+            # Read markdown file
+            with open(args.file, 'r', encoding='utf-8') as f:
+                markdown_content = f.read()
+            
+            # Load question mapping from JSON file if provided
+            question_mapping = None
+            if args.json:
+                if not os.path.exists(args.json):
+                    print(f"错误: JSON文件不存在: {args.json}", file=sys.stderr)
+                    sys.exit(1)
+                
+                try:
+                    with open(args.json, 'r', encoding='utf-8') as f:
+                        json_data = json.load(f)
+                    # 优先使用questions数组，如果没有则使用question_mapping
+                    questions = json_data.get('questions', [])
+                    question_mapping = json_data.get('question_mapping', {})
+                    
+                    if questions:
+                        print(f"从JSON文件加载questions数组: {len(questions)} 道题目")
+                    elif question_mapping:
+                        print(f"从JSON文件加载题目映射: {len(question_mapping)} 道题目")
+                except Exception as e:
+                    print(f"错误: 无法读取JSON文件: {e}", file=sys.stderr)
+                    sys.exit(1)
+            
+            # Debug: 打印参数值
+            if args.verbose:
+                print(f"调试信息: use_llm={args.use_llm}, no_llm={args.no_llm}")
+                if question_mapping:
+                    print(f"题目映射: {question_mapping}")
+            
+            # Check for conflicting arguments
+            if args.use_llm and args.no_llm:
+                print("错误: 不能同时指定 --use-llm 和 --no-llm 选项", file=sys.stderr)
+                sys.exit(1)
+            
+            # Determine parsing method
+            if args.no_llm:
+                use_llm = False
+                print("选择规则解析（--no-llm）")
+            elif args.use_llm:
+                use_llm = True
+                print("选择LLM解析（--use-llm）")
+            else:
+                use_llm = True  # 默认使用LLM
+                print("选择LLM解析（默认）")
+            
+            if args.verbose:
+                if use_llm:
+                    print("使用LLM进行增强解析...")
+                else:
+                    print("使用规则解析...")
+            
+            # Parse and grade markdown test with question mapping
+            markdown_test = grader.parse_markdown_test(markdown_content, use_llm=use_llm, question_mapping=question_mapping, questions=questions)
+            results = grader.grade_markdown_test(markdown_test)
+            
+            # Save results
+            grader.save_grading_results(results)
+            
+            # Print summary
+            summary = results['grading_summary']
+            print(f"\nMarkdown答卷批改完成!")
+            print(f"总题数: {summary['total_questions']}")
+            print(f"正确题数: {summary['correct_questions']}")
+            print(f"准确率: {summary['accuracy_percentage']:.1f}%")
+            print(f"结果已保存到: {args.output}/")
+            
+            # Print error analysis
+            error_analysis = results.get('error_analysis', {})
+            if error_analysis.get('weak_areas'):
+                print(f"\n易错点分析:")
+                print(f"薄弱环节: {', '.join(error_analysis['weak_areas'])}")
+                if error_analysis.get('most_common_error'):
+                    print(f"最常见错误: {error_analysis['most_common_error']}")
+        
+        elif args.command == 'targeted-practice':
+            # Initialize markdown grader
+            grader = MarkdownGrader(output_dir=args.output)
+            
+            # Read markdown file
+            with open(args.file, 'r', encoding='utf-8') as f:
+                markdown_content = f.read()
+            
+            # Parse and grade markdown test to get error analysis
+            markdown_test = grader.parse_markdown_test(markdown_content)
+            results = grader.grade_markdown_test(markdown_test)
+            
+            # Generate targeted practice based on error analysis
+            error_analysis = results.get('error_analysis', {})
+            practice_test = grader.generate_practice_from_errors(
+                error_analysis=error_analysis,
+                choice_count=args.choice_count,
+                calculation_count=args.calculation_count
+            )
+            
+            if "error" in practice_test:
+                print(f"生成针对性练习失败: {practice_test['error']}", file=sys.stderr)
+                sys.exit(1)
+            
+            # Save practice test
+            grader.save_practice_test(practice_test)
+            
+            # Print summary
+            test_info = practice_test.get('test_info', {})
+            print(f"\n针对性练习题目生成完成!")
+            print(f"基于易错点: {', '.join(practice_test.get('targeted_weak_areas', []))}")
+            print(f"错误类型: {', '.join(practice_test.get('practice_error_types', []))}")
+            print(f"题目总数: {test_info.get('total_questions', 0)}")
+            print(f"选择题: {test_info.get('choice_questions', 0)} 道")
+            print(f"计算题: {test_info.get('calculation_questions', 0)} 道")
+            print(f"结果已保存到: {args.output}/")
+        
+        elif args.command == 'ocr-to-markdown':
+            # Initialize grader for OCR to Markdown conversion
+            grader = MathGrader(output_dir=args.output)
+            
+            # Convert image to Markdown
+            result = grader.convert_image_to_markdown(
+                image_path=args.image,
+                format_type=args.format,
+                output_filename=args.filename
+            )
+            
+            if "error" in result:
+                print(f"OCR转Markdown失败: {result['error']}", file=sys.stderr)
+                sys.exit(1)
+            
+            # Print summary
+            print(f"\nOCR转Markdown完成!")
+            print(f"输入图片: {args.image}")
+            print(f"输出格式: {args.format}")
+            print(f"输出文件: {args.output}/{args.filename}")
+            print(f"识别置信度: {result.get('confidence', 0):.1f}%")
+            print(f"识别方法: {result.get('method', 'unknown')}")
         
     except Exception as e:
         print(f"程序运行出错: {e}", file=sys.stderr)

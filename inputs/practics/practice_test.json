@@ -1,0 +1,124 @@
+{
+  "test_info": {
+    "test_id": "PR70F332E51F8C",
+    "generated_at": "2025-09-14T15:34:02.507795",
+    "error_types": [
+      "乘方"
+    ],
+    "total_questions": 4,
+    "choice_questions": 2,
+    "calculation_questions": 2,
+    "test_type": "practice"
+  },
+  "questions": [
+    {
+      "id": "choice_006",
+      "question_info": {
+        "text": "计算：((-2)⁴ × (-1)³) 等于多少？",
+        "subject": "数学",
+        "grade": "七年级",
+        "chapter": "乘方运算",
+        "difficulty": "medium",
+        "tags": [
+          "乘方",
+          "幂运算",
+          "乘法"
+        ],
+        "estimated_time": 90
+      },
+      "question_type": "choice",
+      "choices": [
+        {
+          "id": "a",
+          "content": "-16"
+        },
+        {
+          "id": "b",
+          "content": "16"
+        },
+        {
+          "id": "c",
+          "content": "-8"
+        },
+        {
+          "id": "d",
+          "content": "8"
+        }
+      ],
+      "question_number": "第 1 题"
+    },
+    {
+      "id": "choice_013",
+      "question_info": {
+        "text": "计算：((-1)⁵ + (-2)⁴) 的结果是？",
+        "subject": "数学",
+        "grade": "七年级",
+        "chapter": "乘方运算",
+        "difficulty": "medium",
+        "tags": [
+          "乘方",
+          "幂运算",
+          "加法"
+        ],
+        "estimated_time": 90
+      },
+      "question_type": "choice",
+      "choices": [
+        {
+          "id": "a",
+          "content": "15"
+        },
+        {
+          "id": "b",
+          "content": "-15"
+        },
+        {
+          "id": "c",
+          "content": "-17"
+        },
+        {
+          "id": "d",
+          "content": "17"
+        }
+      ],
+      "question_number": "第 2 题"
+    },
+    {
+      "id": "q_010",
+      "question_info": {
+        "text": "计算：(-2)⁴ ÷ 8 的值是？",
+        "subject": "数学",
+        "grade": "七年级",
+        "chapter": "有理数运算",
+        "difficulty": "medium",
+        "tags": [
+          "有理数",
+          "乘方",
+          "除法"
+        ],
+        "estimated_time": 90
+      },
+      "question_type": "calculation",
+      "question_number": "第 3 题"
+    },
+    {
+      "id": "q_006",
+      "question_info": {
+        "text": "计算：(-2)² × 3 的值是？",
+        "subject": "数学",
+        "grade": "七年级",
+        "chapter": "有理数运算",
+        "difficulty": "medium",
+        "tags": [
+          "有理数",
+          "乘方",
+          "乘法"
+        ],
+        "estimated_time": 90
+      },
+      "question_type": "calculation",
+      "question_number": "第 4 题"
+    }
+  ],
+  "instructions": "练习试卷说明：\n本试卷重点练习：乘方\n\n答题要求：\n1. 选择题请选择正确答案\n2. 计算题请写出完整的解题过程\n3. 注意运算符号的正确使用\n4. 仔细检查计算结果\n\n祝学习进步！"
+}
