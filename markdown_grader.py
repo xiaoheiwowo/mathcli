@@ -736,6 +736,8 @@ class MarkdownGrader:
                     raw=answer.student_answer,
                     steps=solution_steps
                 )
+
+                print(student_solution)
                 
                 problem = MathProblem(
                     problem_id=answer.question_id,  # 使用题库中的题目ID
@@ -845,21 +847,25 @@ class MarkdownGrader:
         
         # 检查分数运算错误
         if self._has_fraction_error(from_expr, to_expr):
-            return '分数运算错误'
+            return '分数运算'
+        
+        # 检查小数运算错误
+        if self._has_decimal_error(from_expr, to_expr):
+            return '小数运算'
         
         # 检查乘方运算错误
         if self._has_power_error(from_expr, to_expr):
-            return '乘方运算错误'
+            return '乘方'
         
         # 检查运算顺序错误
         if self._has_order_error(from_expr, to_expr):
-            return '运算顺序错误'
+            return '混合运算'
         
         # 检查基本计算错误
         if self._has_calculation_error(from_expr, to_expr):
             return '计算错误'
         
-        return '未知错误'
+        return '计算错误'  # 默认为计算错误
     
     def _has_sign_error(self, from_expr: str, to_expr: str) -> bool:
         """检查是否有符号错误"""
@@ -920,6 +926,10 @@ class MarkdownGrader:
     def _has_fraction_error(self, from_expr: str, to_expr: str) -> bool:
         """检查是否有分数运算错误"""
         return '/' in from_expr or '/' in to_expr
+    
+    def _has_decimal_error(self, from_expr: str, to_expr: str) -> bool:
+        """检查是否有小数运算错误"""
+        return '.' in from_expr or '.' in to_expr
     
     def _has_power_error(self, from_expr: str, to_expr: str) -> bool:
         """检查是否有乘方运算错误"""
@@ -992,23 +1002,35 @@ class MarkdownGrader:
                 "注意括号内符号的处理",
                 "多做符号相关的练习题"
             ])
-        elif error_category == '分数运算错误':
+        elif error_category == '分数运算':
             suggestions.extend([
                 "加强分数的通分和约分练习",
                 "注意分数运算的基本法则",
                 "练习分数的四则运算"
             ])
-        elif error_category == '乘方运算错误':
+        elif error_category == '小数运算':
+            suggestions.extend([
+                "加强小数的四则运算练习",
+                "注意小数点的位置处理",
+                "练习小数的加减乘除运算"
+            ])
+        elif error_category == '乘方':
             suggestions.extend([
                 "重点练习乘方的计算规则",
                 "注意底数和指数的关系",
                 "多做乘方相关的练习题"
             ])
-        elif error_category == '运算顺序错误':
+        elif error_category == '混合运算':
             suggestions.extend([
                 "复习运算顺序规则：先乘除后加减，有括号先算括号内",
                 "注意括号的正确使用",
                 "多做混合运算练习题"
+            ])
+        elif error_category == '方程':
+            suggestions.extend([
+                "加强方程求解的练习",
+                "注意移项变号的规则",
+                "多做一元一次方程练习题"
             ])
         else:
             suggestions.extend([
@@ -1119,13 +1141,15 @@ class MarkdownGrader:
         if '符号' in question_text or '负数' in question_text or '正负' in question_text:
             return '符号错误'
         elif '分数' in question_text or '/' in question_text:
-            return '分数运算错误'
+            return '分数运算'
+        elif '小数' in question_text or '.' in question_text:
+            return '小数运算'
         elif '乘方' in question_text or '²' in question_text or '³' in question_text:
-            return '乘方运算错误'
+            return '乘方'
         elif '方程' in question_text or '解' in question_text:
-            return '方程求解错误'
+            return '方程'
         elif '混合' in question_text or ('+' in question_text and '×' in question_text):
-            return '混合运算错误'
+            return '混合运算'
         else:
             return '计算错误'
     
@@ -1250,17 +1274,35 @@ class MarkdownGrader:
                 "注意负号的处理，特别是乘方运算",
                 "多做符号相关的练习题"
             ])
-        elif error_type == '分数运算错误':
+        elif error_type == '分数运算':
             suggestions.extend([
                 "加强分数的通分和约分练习",
                 "注意分数运算的基本法则",
                 "练习分数的四则运算"
             ])
-        elif error_type == '乘方运算错误':
+        elif error_type == '小数运算':
+            suggestions.extend([
+                "加强小数的四则运算练习",
+                "注意小数点的位置处理",
+                "练习小数的加减乘除运算"
+            ])
+        elif error_type == '乘方':
             suggestions.extend([
                 "重点练习乘方的计算规则",
                 "注意底数和指数的关系",
                 "多做乘方相关的练习题"
+            ])
+        elif error_type == '混合运算':
+            suggestions.extend([
+                "复习运算顺序规则：先乘除后加减，有括号先算括号内",
+                "注意括号的正确使用",
+                "多做混合运算练习题"
+            ])
+        elif error_type == '方程':
+            suggestions.extend([
+                "加强方程求解的练习",
+                "注意移项变号的规则",
+                "多做一元一次方程练习题"
             ])
         else:
             suggestions.extend([
@@ -1307,7 +1349,7 @@ class MarkdownGrader:
 }}
 
 要求：
-1. 将解答过程分解为详细的步骤
+1. 将解答过程分解为详细的步骤，如果未解答，处理为错误。
 2. 每个步骤包含from_expr（起始表达式）和to_expr（结果表达式）
 3. 判断每个步骤是否正确
 4. 如果步骤错误，提供错误类型和说明
@@ -1394,8 +1436,7 @@ class MarkdownGrader:
         try:
             prompt = f"""请将以下数学题目和学生解答过程解析为结构化的步骤信息。
 
-题目：
-{question_text}
+
 
 学生解答过程：
 {solution_text}
@@ -1413,14 +1454,13 @@ class MarkdownGrader:
   ]
 }}
 
+
 要求：
-1. 将解答过程分解为详细的步骤
+1. 将学生解答过程分解为详细的步骤，如果未答题，处理为错误即可，不需要解析答题过程。
 2. 每个步骤包含from_expr（起始表达式）和to_expr（结果表达式）
-3. 判断每个步骤是否正确
+3. 判断每个步骤是否正确。
 4. 如果步骤错误，提供错误类型和说明
 5. 特别注意符号运算的正确性，如 a - (-b) = a + b
-6. 确保from_expr不为空
-7. 结合题目内容理解解答过程
 
 请严格按照JSON格式返回，不要包含其他内容。"""
 
@@ -1618,17 +1658,47 @@ class MarkdownGrader:
                 "related_knowledge": ["负数运算规则", "有理数概念"],
                 "practice_focus": "符号运算练习"
             },
+            "分数运算": {
+                "bank_error_type": "分数运算",
+                "description": "分数四则运算错误",
+                "related_knowledge": ["分数运算", "通分约分"],
+                "practice_focus": "分数运算练习"
+            },
             "分数运算错误": {
                 "bank_error_type": "分数运算",
                 "description": "分数四则运算错误",
                 "related_knowledge": ["分数运算", "通分约分"],
                 "practice_focus": "分数运算练习"
             },
+            "小数运算": {
+                "bank_error_type": "小数运算",
+                "description": "小数四则运算错误",
+                "related_knowledge": ["小数运算", "小数点处理"],
+                "practice_focus": "小数运算练习"
+            },
+            "小数运算错误": {
+                "bank_error_type": "小数运算",
+                "description": "小数四则运算错误",
+                "related_knowledge": ["小数运算", "小数点处理"],
+                "practice_focus": "小数运算练习"
+            },
+            "乘方": {
+                "bank_error_type": "乘方",
+                "description": "乘方计算错误",
+                "related_knowledge": ["乘方运算", "指数运算"],
+                "practice_focus": "乘方运算练习"
+            },
             "乘方运算错误": {
                 "bank_error_type": "乘方",
                 "description": "乘方计算错误",
                 "related_knowledge": ["乘方运算", "指数运算"],
                 "practice_focus": "乘方运算练习"
+            },
+            "混合运算": {
+                "bank_error_type": "混合运算",
+                "description": "混合运算错误",
+                "related_knowledge": ["运算顺序", "四则运算"],
+                "practice_focus": "混合运算练习"
             },
             "运算顺序错误": {
                 "bank_error_type": "混合运算",
@@ -1641,6 +1711,18 @@ class MarkdownGrader:
                 "description": "基本计算错误",
                 "related_knowledge": ["四则运算", "基础计算"],
                 "practice_focus": "基础计算练习"
+            },
+            "方程": {
+                "bank_error_type": "方程",
+                "description": "方程求解错误",
+                "related_knowledge": ["方程求解", "一元一次方程"],
+                "practice_focus": "方程求解练习"
+            },
+            "方程求解错误": {
+                "bank_error_type": "方程",
+                "description": "方程求解错误",
+                "related_knowledge": ["方程求解", "一元一次方程"],
+                "practice_focus": "方程求解练习"
             }
         }
         
@@ -1920,27 +2002,6 @@ class MarkdownGrader:
                 weak_areas = error_analysis.get('weak_areas', [])
                 if weak_areas:
                     f.write(f"**薄弱环节**: {', '.join(weak_areas)}\n\n")
-            
-            # 练习推荐
-            recommendations = results.get('practice_recommendations', {})
-            if recommendations:
-                f.write("## 练习推荐\n\n")
-                
-                priority_areas = recommendations.get('priority_areas', [])
-                if priority_areas:
-                    f.write("**重点练习领域**:\n")
-                    for area in priority_areas:
-                        f.write(f"- {area}\n")
-                
-                suggestions = recommendations.get('practice_suggestions', [])
-                if suggestions:
-                    f.write("\n**具体建议**:\n")
-                    for suggestion in suggestions:
-                        f.write(f"- {suggestion}\n")
-                
-                next_focus = recommendations.get('next_practice_focus', [])
-                if next_focus:
-                    f.write(f"\n**下次练习重点**: {', '.join(next_focus)}\n")
         
         self.logger.info(f"批改报告已保存到: {report_file}")
     
