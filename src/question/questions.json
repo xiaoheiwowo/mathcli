@@ -1,0 +1,10 @@
+{
+    "questions": [
+        {
+            "id": 1,
+            "question": "1+1=?",
+            "solution": "1+1=2",
+            "answer": "2"
+        }
+    ]
+}

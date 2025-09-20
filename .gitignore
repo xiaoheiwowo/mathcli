@@ -4,6 +4,7 @@
 
 # img/
 output/
+data/*
 
 ### macOS ###
 # General
